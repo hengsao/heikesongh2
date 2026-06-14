@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, useState } from "react";
 import { generateCardImage, generateLifeCardText } from "./aiService";
 import {
   getAnniversaries,
+  getDiaries,
   getLifeCards,
   getProfile,
   getReviewSettings,
@@ -9,6 +10,7 @@ import {
   getTodos,
   resetStorage,
   saveAnniversaries,
+  saveDiaries,
   saveLifeCards,
   saveProfile,
   saveReviewSettings,
@@ -19,6 +21,7 @@ import type {
   Anniversary,
   CheckInInput,
   DiaryEntry,
+  DiaryNote,
   LifeCard,
   LifeTask,
   ReviewSettings,
@@ -45,6 +48,7 @@ type AppDataContextValue = {
   toggleTodoPin: (id: string) => void;
   createLifeCard: (input: CheckInInput) => Promise<LifeCard>;
   updateDiary: (cardId: string, diary: DiaryEntry) => void;
+  removeLifeCard: (cardId: string) => void;
   addAnniversary: (anniversary: Omit<Anniversary, "id" | "createdAt">) => void;
   resetAllData: () => void;
 };
@@ -239,6 +243,14 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         const nextCards = lifeCards.map((card) => (card.id === cardId ? { ...card, diary } : card));
         setLifeCards(nextCards);
         saveLifeCards(nextCards);
+      },
+      removeLifeCard(cardId) {
+        const nextCards = lifeCards.filter((card) => card.id !== cardId);
+        const nextAnniversaries = anniversaries.filter((ann) => ann.relatedCardId !== cardId);
+        setLifeCards(nextCards);
+        setAnniversaries(nextAnniversaries);
+        saveLifeCards(nextCards);
+        saveAnniversaries(nextAnniversaries);
       },
       addAnniversary(input) {
         const anniversary: Anniversary = {

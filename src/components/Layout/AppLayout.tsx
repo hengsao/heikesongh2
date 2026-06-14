@@ -19,11 +19,11 @@ import { useAppData } from "../../services/AppDataContext";
 const navItems = [
   { to: "/", label: "进度盘", icon: Home },
   { to: "/tasks", label: "任务库", icon: Compass },
-  { to: "/todos", label: "小日记", icon: PenLine },
+  { to: "/diary", label: "小日记", icon: PenLine },
   { to: "/todos", label: "待办", icon: ListChecks },
-  { to: "/timeline", label: "轨迹", icon: TimerReset },
   { to: "/reviews", label: "复盘", icon: BookOpen },
   { to: "/anniversaries", label: "纪念日", icon: CalendarHeart },
+  { to: "/timeline", label: "轨迹", icon: TimerReset },
   { to: "/settings", label: "设置", icon: Settings },
 ];
 

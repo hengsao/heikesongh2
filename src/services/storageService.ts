@@ -1,5 +1,5 @@
-import { defaultAIApiConfig, defaultAIPreferences, defaultProfile, mockAnniversaries, mockLifeCards, mockTodos, seededTasks } from "../data/mockData";
-import type { Anniversary, LifeCard, LifeTask, ReviewSettings, TodoItem, UserProfile } from "../types";
+import { defaultAIApiConfig, defaultAIPreferences, defaultProfile, mockAnniversaries, mockDiaryNotes, mockLifeCards, mockTodos, seededTasks } from "../data/mockData";
+import type { Anniversary, DiaryNote, LifeCard, LifeTask, ReviewSettings, TodoItem, UserProfile } from "../types";
 
 const keys = {
   tasks: "lifequest.tasks",
@@ -9,6 +9,7 @@ const keys = {
   anniversaries: "lifequest.anniversaries",
   reviewSettings: "lifequest.reviewSettings",
   profile: "lifequest.profile",
+  diaries: "lifequest.diaries",
 };
 
 const defaultReviewSettings: ReviewSettings = {
@@ -26,6 +27,7 @@ export function initializeStorage() {
   ensure(keys.anniversaries, mockAnniversaries);
   ensure(keys.reviewSettings, defaultReviewSettings);
   ensure(keys.profile, defaultProfile);
+  ensure(keys.diaries, mockDiaryNotes);
 }
 
 export function getTasks() {
@@ -53,6 +55,15 @@ export function getLifeCards() {
 
 export function saveLifeCards(value: LifeCard[]) {
   write(keys.cards, value.map(normalizeCard));
+}
+
+export function getDiaries() {
+  initializeStorage();
+  return read<DiaryNote[]>(keys.diaries, mockDiaryNotes).map(normalizeDiary);
+}
+
+export function saveDiaries(value: DiaryNote[]) {
+  write(keys.diaries, value.map(normalizeDiary));
 }
 
 export function getAnniversaries() {
@@ -101,6 +112,7 @@ export function exportAllData() {
     lifeCards: getLifeCards(),
     anniversaries: getAnniversaries(),
     reviewSettings: getReviewSettings(),
+    diaries: getDiaries(),
   };
 }
 
@@ -161,6 +173,17 @@ function normalizeCard(card: any): LifeCard {
           moodText: card.diary.moodText ?? (Array.isArray(card.diary.moodTags) ? card.diary.moodTags.join("、") : moodText),
         }
       : undefined,
+  };
+}
+
+function normalizeDiary(diary: any): DiaryNote {
+  return {
+    id: diary.id ?? `diary_note_${Date.now()}`,
+    date: diary.date ?? new Date().toISOString().slice(0, 10),
+    title: diary.title ?? "无标题日记",
+    content: diary.content ?? "",
+    createdAt: diary.createdAt ?? new Date().toISOString(),
+    updatedAt: diary.updatedAt ?? diary.createdAt ?? new Date().toISOString(),
   };
 }
 

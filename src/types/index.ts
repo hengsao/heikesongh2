@@ -83,6 +83,16 @@ export type DiaryEntry = {
   updatedAt: string;
 };
 
+/** 独立日记条目 — 不与人生卡绑定，存储在独立 localStorage key */
+export type DiaryNote = {
+  id: string;
+  date: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Anniversary = {
   id: string;
   title: string;

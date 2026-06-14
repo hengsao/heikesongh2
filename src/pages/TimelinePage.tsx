@@ -5,7 +5,7 @@ import { taskCategories } from "../data/presetTasks";
 import { useAppData } from "../services/AppDataContext";
 
 export function TimelinePage() {
-  const { lifeCards } = useAppData();
+  const { lifeCards, removeLifeCard } = useAppData();
   const [category, setCategory] = useState("全部");
   const [mood, setMood] = useState("全部");
   const [order, setOrder] = useState<"desc" | "asc">("desc");
@@ -41,7 +41,7 @@ export function TimelinePage() {
           </button>
         </div>
       </section>
-      <TimelineList cards={cards} />
+      <TimelineList cards={cards} onDelete={removeLifeCard} />
     </div>
   );
 }

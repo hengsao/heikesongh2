@@ -1,8 +1,15 @@
+import { Trash2 } from "lucide-react";
 import type { LifeCard } from "../../types";
 import { groupCardsByMonth } from "../../utils/date";
 import { LifeCardPreview } from "../LifeCard/LifeCardPreview";
 
-export function TimelineList({ cards }: { cards: LifeCard[] }) {
+export function TimelineList({
+  cards,
+  onDelete,
+}: {
+  cards: LifeCard[];
+  onDelete?: (cardId: string) => void;
+}) {
   const groups = groupCardsByMonth(cards);
 
   if (!cards.length) {
@@ -20,7 +27,24 @@ export function TimelineList({ cards }: { cards: LifeCard[] }) {
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {monthCards.map((card) => (
-              <LifeCardPreview key={card.id} card={card} compact />
+              <div key={card.id} className="group/card relative">
+                <LifeCardPreview card={card} compact />
+                {onDelete && (
+                  <button
+                    className="absolute right-2 top-2 z-10 rounded-md bg-white/90 p-1.5 text-zinc-400 opacity-0 shadow-sm backdrop-blur transition-all duration-150 hover:bg-red-50 hover:text-red-500 group-hover/card:opacity-100"
+                    title="删除这张人生卡"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (window.confirm("确定要删除这张人生卡吗？")) {
+                        onDelete(card.id);
+                      }
+                    }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </section>
