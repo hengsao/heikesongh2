@@ -23,7 +23,7 @@ export function TimelinePage() {
   return (
     <div className="page-shell space-y-6">
       <section className="glass-card p-6">
-        <p className="text-sm font-bold text-coral">人生轨迹</p>
+        <p className="text-sm font-bold text-zinc-500">人生轨迹</p>
         <h1 className="section-title mt-2">按月份回看你的真实记录</h1>
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
           <label className="relative">
@@ -35,7 +35,7 @@ export function TimelinePage() {
           <select className="soft-input" value={mood} onChange={(event) => setMood(event.target.value)}>
             {["全部", ...moodOptions].map((item) => <option key={item}>{item}</option>)}
           </select>
-          <button className="secondary-button justify-start" onClick={() => setOrder(order === "desc" ? "asc" : "desc")}>
+          <button className="btn-secondary justify-start" onClick={() => setOrder(order === "desc" ? "asc" : "desc")}>
             <ArrowDownAZ size={18} />
             {order === "desc" ? "按时间从新到旧" : "按时间从旧到新"}
           </button>

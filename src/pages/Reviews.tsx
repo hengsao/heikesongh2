@@ -51,7 +51,7 @@ export function Reviews() {
   return (
     <div className="page-shell space-y-6">
       <section className="glass-card p-6">
-        <p className="text-sm font-bold text-coral">复盘回溯</p>
+        <p className="text-sm font-bold text-zinc-500">复盘回溯</p>
         <h1 className="section-title mt-2">基于真实完成记录，而不是模板鼓励</h1>
         <p className="mt-2 max-w-2xl text-sm leading-7 text-zinc-600">
           AI 会读取当前周期内完成的人生卡，结合任务标题、感受和自由情绪，生成更像倾听者的阶段总结。

@@ -46,13 +46,13 @@ export function TaskLibrary() {
       <section className="glass-card p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-bold text-coral">人生任务库</p>
+            <p className="text-sm font-bold text-zinc-500">人生任务库</p>
             <h1 className="section-title mt-2">挑一件今天能完成的小支线</h1>
             <p className="mt-2 max-w-2xl text-sm leading-7 text-zinc-600">
               任务条目改成了更轻的左图右文布局：先看任务，再决定加入待办或立即打卡。
             </p>
           </div>
-          <button type="button" className="primary-button" onClick={() => setShowForm((value) => !value)}>
+          <button type="button" className="btn-primary" onClick={() => setShowForm((value) => !value)}>
             <Plus size={18} />
             创建每日待办来源
           </button>
@@ -92,7 +92,7 @@ export function TaskLibrary() {
             <input type="checkbox" checked={form.isImportant} onChange={(event) => setForm({ ...form, isImportant: event.target.checked })} />
             设为重要任务
           </label>
-          <button className="primary-button md:justify-self-end" type="submit">创建并加入待办</button>
+          <button className="btn-primary md:justify-self-end" type="submit">创建并加入待办</button>
         </form>
       ) : null}
 

@@ -83,7 +83,7 @@ export function CheckIn() {
     <div className="page-shell">
       <form className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_0.9fr]" onSubmit={submit}>
         <section className="glass-card p-6">
-          <p className="text-sm font-bold text-coral">完成打卡</p>
+          <p className="text-sm font-bold text-zinc-500">完成打卡</p>
           <h1 className="mt-2 text-3xl font-black text-ink">{task.title}</h1>
           <p className="mt-3 text-sm leading-7 text-zinc-600">{task.description}</p>
           <div className="mt-5 flex flex-wrap gap-2">
@@ -101,7 +101,7 @@ export function CheckIn() {
               <span className="mb-2 block text-sm font-bold text-zinc-600">地点</span>
               <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
                 <input className="soft-input" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="比如：学校附近的小火锅店" />
-                <button className="secondary-button" type="button" onClick={getLocation}>
+                <button className="btn-secondary" type="button" onClick={getLocation}>
                   <LocateFixed size={18} />
                   获取当前位置
                 </button>
@@ -125,16 +125,16 @@ export function CheckIn() {
               />
             </label>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="secondary-button cursor-pointer">
+              <label className="btn-secondary cursor-pointer">
                 <Camera size={18} />
                 上传照片
                 <input type="file" accept="image/*" className="hidden" onChange={handleImage} />
               </label>
-              <label className="secondary-button cursor-pointer justify-start">
+              <label className="btn-secondary cursor-pointer justify-start">
                 <input type="checkbox" checked={isAnniversary} onChange={(event) => setIsAnniversary(event.target.checked)} />
                 设为纪念日
               </label>
-              <label className="secondary-button cursor-pointer justify-start sm:col-span-2">
+              <label className="btn-secondary cursor-pointer justify-start sm:col-span-2">
                 <input type="checkbox" checked={shouldGenerateImage} disabled={Boolean(imageUrl)} onChange={(event) => setShouldGenerateImage(event.target.checked)} />
                 {imageUrl ? "已上传照片，将优先使用用户图片" : "未上传照片时生成 AI 纪念图"}
               </label>
@@ -156,7 +156,7 @@ export function CheckIn() {
               </div>
             </div>
             <div className="p-5">
-              <button className="primary-button w-full" type="submit" disabled={submitting}>
+              <button className="btn-primary w-full" type="submit" disabled={submitting}>
                 {submitting ? <Loader2 className="animate-spin" size={18} /> : <Sparkles size={18} />}
                 {submitting ? "正在生成..." : "生成我的人生卡"}
               </button>

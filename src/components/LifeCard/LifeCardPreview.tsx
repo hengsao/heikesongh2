@@ -1,4 +1,4 @@
-import { Calendar, Image as ImageIcon, MapPin, Sparkles } from "lucide-react";
+import { Calendar, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { LifeCard } from "../../types";
 import { formatDate } from "../../utils/date";
@@ -7,43 +7,67 @@ export function LifeCardPreview({ card, compact = false }: { card: LifeCard; com
   return (
     <Link
       to={`/cards/${card.id}`}
-      className="group glass-card block overflow-hidden transition hover:-translate-y-1 hover:shadow-glow"
+      className="group glass-card flex flex-col overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-hover"
     >
-      <div className="relative min-h-40 bg-gradient-to-br from-blush via-cream to-skysoft p-5">
+      {/* 图片区域 - 统一 aspect-ratio 保证网格对齐 */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-blush via-cream to-skysoft">
         {card.imageUrl ? (
-          <img src={card.imageUrl} alt={card.title} className="absolute inset-0 h-full w-full object-cover" />
+          <img
+            src={card.imageUrl}
+            alt={card.title}
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
         ) : null}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-white/10" />
-        <div className="relative flex h-full min-h-32 flex-col justify-between gap-8">
-          <div className="flex justify-between gap-3">
-            <span className="rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-ink">{card.category}</span>
-            <span className="rounded-full bg-ink/85 px-3 py-1 text-xs font-bold text-white">
-              {card.imageSource === "uploaded" ? "用户照片" : card.imageSource === "ai" ? "AI 图" : "记录卡"}
-            </span>
-          </div>
-          <div>
-            <h3 className="text-xl font-black text-ink">{card.title}</h3>
-            <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-700">{card.aiGeneratedText}</p>
-          </div>
+        {/* 渐变遮罩 */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
+
+        {/* 标签：左上角固定位置，两个标签统一 rounded-md */}
+        <div className="absolute left-2.5 top-2.5 z-10 flex flex-wrap gap-1.5">
+          <span className="inline-flex items-center rounded-md bg-white/90 px-2 py-0.5 text-2xs font-bold text-ink shadow-sm backdrop-blur-sm">
+            {card.category}
+          </span>
+          <span className="inline-flex items-center rounded-md bg-ink/85 px-2 py-0.5 text-2xs font-bold text-white shadow-sm backdrop-blur-sm">
+            {card.imageSource === "uploaded"
+              ? "用户照片"
+              : card.imageSource === "ai"
+                ? "AI 图"
+                : "记录卡"}
+          </span>
         </div>
       </div>
-      <div className="space-y-3 p-5">
-        <p className="inline-flex rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">{card.moodText}</p>
-        <div className="flex flex-wrap gap-3 text-xs font-semibold text-zinc-500">
-          <span className="inline-flex items-center gap-1">
-            <Calendar size={14} />
-            {formatDate(card.completedAt)}
-          </span>
-          {card.location ? (
-            <span className="inline-flex items-center gap-1">
-              <MapPin size={14} />
-              {card.location}
+
+      {/* 文字区 - 统一内边距 p-3.5 */}
+      <div className="flex flex-1 flex-col justify-between gap-2.5 p-3.5">
+        <div>
+          <h3 className="text-sm font-bold leading-snug text-ink line-clamp-1">{card.title}</h3>
+          <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">
+            {card.aiGeneratedText}
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          {/* 情绪标签 */}
+          {card.moodText && (
+            <span className="inline-flex items-center rounded-md bg-orange-50 px-2 py-0.5 text-2xs font-bold text-orange-600">
+              {card.moodText}
             </span>
-          ) : null}
-          <span className="ml-auto inline-flex items-center gap-1 text-coral">
-            {card.imageSource === "uploaded" ? <ImageIcon size={14} /> : <Sparkles size={14} />}
-            {compact ? "查看" : "人生卡"}
-          </span>
+          )}
+          {/* 底部信息行 */}
+          <div className="flex flex-wrap items-center gap-2 text-2xs font-medium text-zinc-300">
+            <span className="inline-flex items-center gap-1">
+              <Calendar size={11} />
+              {formatDate(card.completedAt)}
+            </span>
+            {card.location ? (
+              <span className="inline-flex items-center gap-1">
+                <MapPin size={11} />
+                {card.location}
+              </span>
+            ) : null}
+            <span className="ml-auto text-2xs font-semibold text-zinc-300">
+              {compact ? "查看详情" : "人生卡"}
+            </span>
+          </div>
         </div>
       </div>
     </Link>

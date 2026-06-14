@@ -68,12 +68,12 @@ export function LifeCardDetail() {
             ) : null}
           </div>
           {card.isAnniversary ? (
-            <Link to="/anniversaries" className="secondary-button mt-5">查看纪念日</Link>
+            <Link to="/anniversaries" className="btn-secondary mt-5">查看纪念日</Link>
           ) : null}
         </div>
 
         <div className="glass-card p-6">
-          <p className="mb-3 flex items-center gap-2 text-sm font-black text-coral">
+          <p className="mb-3 flex items-center gap-2 text-sm font-black text-zinc-500">
             <Image size={17} />
             图片记录
           </p>
@@ -94,7 +94,7 @@ export function LifeCardDetail() {
           <div className="mt-3 flex flex-wrap gap-2">
             {moodExamples.map((item) => <MoodPill key={item} text={item} selected={moodText === item} onClick={() => setMoodText(item)} />)}
           </div>
-          <button className="primary-button mt-5" type="button" onClick={saveDiary}>
+          <button className="btn-primary mt-5" type="button" onClick={saveDiary}>
             <Save size={18} />
             保存日记
           </button>

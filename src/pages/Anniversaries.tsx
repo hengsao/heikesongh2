@@ -34,7 +34,7 @@ export function Anniversaries() {
   return (
     <div className="page-shell space-y-6">
       <section className="glass-card p-6">
-        <p className="text-sm font-bold text-coral">纪念日</p>
+        <p className="text-sm font-bold text-zinc-500">纪念日</p>
         <h1 className="section-title mt-2">把重要时刻变成可回看的节点</h1>
       </section>
 
@@ -46,7 +46,7 @@ export function Anniversaries() {
           <option value="countDown">倒数日</option>
         </select>
         <input className="soft-input" placeholder="描述" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
-        <button className="primary-button" type="submit">
+        <button className="btn-primary" type="submit">
           <CalendarPlus size={18} />
           添加
         </button>
@@ -70,7 +70,7 @@ function AnniversarySection({ title, items }: { title: string; items: ReturnType
             const text = item.type === "countDown" ? `还有 ${Math.max(diff, 0)} 天` : `已经过去 ${Math.abs(diff)} 天`;
             return (
               <article key={item.id} className="glass-card p-5">
-                <p className="mb-3 flex items-center gap-2 text-sm font-bold text-coral">
+                <p className="mb-3 flex items-center gap-2 text-sm font-bold text-zinc-500">
                   <Clock size={16} />
                   {text}
                 </p>
@@ -78,7 +78,7 @@ function AnniversarySection({ title, items }: { title: string; items: ReturnType
                 <p className="mt-2 text-sm text-zinc-500">{formatDate(item.date)} · {item.source === "fromLifeCard" ? "来自人生卡" : "手动添加"}</p>
                 <p className="mt-3 line-clamp-3 text-sm leading-7 text-zinc-600">{item.description}</p>
                 {item.relatedCardId ? (
-                  <Link className="secondary-button mt-4 w-full" to={`/cards/${item.relatedCardId}`}>
+                  <Link className="btn-secondary mt-4 w-full" to={`/cards/${item.relatedCardId}`}>
                     查看关联人生卡
                   </Link>
                 ) : null}

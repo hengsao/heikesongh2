@@ -60,7 +60,7 @@ export function Settings() {
   return (
     <div className="page-shell space-y-6">
       <section className="glass-card p-6">
-        <p className="text-sm font-bold text-coral">设置</p>
+        <p className="text-sm font-bold text-zinc-500">设置</p>
         <h1 className="section-title mt-2">调整 LifeQuest 的陪伴方式</h1>
         <p className="mt-2 text-sm leading-7 text-zinc-600">AI 偏好会影响人生卡文案、复盘总结和下一步建议的语气。</p>
       </section>
@@ -86,7 +86,7 @@ export function Settings() {
               <option value="dark">夜间深色（占位）</option>
             </select>
           </label>
-          <button className="primary-button" onClick={saveProfile}>
+          <button className="btn-primary" onClick={saveProfile}>
             <Save size={18} />
             保存设置
           </button>
@@ -155,15 +155,15 @@ export function Settings() {
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            <button className="primary-button" type="button" onClick={saveProfile}>
+            <button className="btn-primary" type="button" onClick={saveProfile}>
               <Save size={18} />
               保存 API 配置
             </button>
-            <button className="secondary-button" type="button" onClick={testTextApi} disabled={testingApi !== null}>
+            <button className="btn-secondary" type="button" onClick={testTextApi} disabled={testingApi !== null}>
               <PlugZap size={18} />
               {testingApi === "text" ? "测试中..." : "测试文本 API"}
             </button>
-            <button className="secondary-button" type="button" onClick={testImageApi} disabled={testingApi !== null}>
+            <button className="btn-secondary" type="button" onClick={testImageApi} disabled={testingApi !== null}>
               <PlugZap size={18} />
               {testingApi === "image" ? "测试中..." : "测试生图 API"}
             </button>
@@ -178,11 +178,11 @@ export function Settings() {
       </section>
 
       <section className="glass-card flex flex-col gap-3 p-6 sm:flex-row">
-        <button className="secondary-button" onClick={exportJson}>
+        <button className="btn-secondary" onClick={exportJson}>
           <Download size={18} />
           导出 JSON
         </button>
-        <button className="secondary-button text-rose-700" onClick={resetAllData}>
+        <button className="btn-secondary text-rose-700" onClick={resetAllData}>
           <RefreshCcw size={18} />
           清空并恢复演示数据
         </button>

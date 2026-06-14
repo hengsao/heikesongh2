@@ -26,15 +26,15 @@ export function TaskCard({ task, onAddTodo }: { task: LifeTask; onAddTodo: (task
           <span className="w-fit rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">{task.category}</span>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <button className="secondary-button px-3 py-2" type="button" onClick={() => onAddTodo(task)}>
+          <button className="btn-secondary px-3 py-2" type="button" onClick={() => onAddTodo(task)}>
             <Plus size={16} />
             加入待办事项
           </button>
-          <Link to={`/checkin/${task.id}`} className="primary-button px-3 py-2">
+          <Link to={`/checkin/${task.id}`} className="btn-primary px-3 py-2">
             立即打卡
             <ArrowRight size={16} />
           </Link>
-          <Link to={`/checkin/${task.id}`} className="secondary-button px-3 py-2">
+          <Link to={`/checkin/${task.id}`} className="btn-secondary px-3 py-2">
             <Eye size={16} />
             查看详情
           </Link>

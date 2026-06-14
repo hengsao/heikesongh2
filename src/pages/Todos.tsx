@@ -46,7 +46,7 @@ export function Todos() {
   return (
     <div className="page-shell space-y-6">
       <section className="glass-card p-6">
-        <p className="text-sm font-bold text-coral">待办事项</p>
+        <p className="text-sm font-bold text-zinc-500">待办事项</p>
         <h1 className="section-title mt-2">今天要完成的小支线</h1>
         <p className="mt-2 text-sm leading-7 text-zinc-600">这里是每日待办，不再是中长期愿望池。完成后可以一键转入正式打卡流程。</p>
         <div className="mt-5 grid gap-3 md:grid-cols-[220px_1fr]">
@@ -60,7 +60,7 @@ export function Todos() {
       <form className="glass-card grid grid-cols-1 gap-3 p-5 md:grid-cols-[1fr_1.2fr_auto]" onSubmit={submit}>
         <input className="soft-input" placeholder="新增待办，例如：拍一张今天的天空" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} />
         <input className="soft-input" placeholder="补充描述，可选" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} />
-        <button className="primary-button" type="submit">
+        <button className="btn-primary" type="submit">
           <Plus size={18} />
           {editingId ? "保存" : "新增"}
         </button>
@@ -101,12 +101,12 @@ function TodoSection({ title, items, completed, onDone, onRemove, onPin, onEdit,
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {!completed ? (
-                  <button className="secondary-button px-3 py-2" onClick={() => onDone(item.id)} type="button">
+                  <button className="btn-secondary px-3 py-2" onClick={() => onDone(item.id)} type="button">
                     <CheckCircle2 size={17} />
                     标记完成
                   </button>
                 ) : null}
-                <Link className="primary-button px-3 py-2" to={getTarget(item.title, item.sourceTaskId)}>
+                <Link className="btn-primary px-3 py-2" to={getTarget(item.title, item.sourceTaskId)}>
                   完成打卡
                 </Link>
                 <button className="icon-button" title="置顶" onClick={() => onPin(item.id)}><Pin size={17} /></button>
