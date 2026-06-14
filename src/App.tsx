@@ -8,7 +8,7 @@ import { Reviews } from "./pages/Reviews";
 import { Settings } from "./pages/Settings";
 import { TaskLibrary } from "./pages/TaskLibrary";
 import { TimelinePage } from "./pages/TimelinePage";
-import { Wishlist } from "./pages/Wishlist";
+import { Todos } from "./pages/Todos";
 
 export default function App() {
   return (
@@ -16,7 +16,8 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="/tasks" element={<TaskLibrary />} />
-        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/todos" element={<Todos />} />
+        <Route path="/wishlist" element={<Navigate to="/todos" replace />} />
         <Route path="/checkin/:taskId" element={<CheckIn />} />
         <Route path="/cards/:cardId" element={<LifeCardDetail />} />
         <Route path="/anniversaries" element={<Anniversaries />} />

@@ -12,27 +12,29 @@ export function ReviewPanel({ report }: { report: ReviewReport }) {
           </span>
           <div>
             <h2 className="section-title">{report.title}</h2>
-            <p className="text-sm text-zinc-500">真实前端统计 + AI mock 复盘</p>
+            <p className="text-sm text-zinc-500">真实前端统计 + AI 具体复盘</p>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Metric label="完成打卡" value={`${report.cardCount} 张`} />
-          <Metric label="常见心情" value={report.topMood ?? "等待记录"} />
+          <Metric label="常见情绪" value={report.topMood ?? "等待记录"} />
           <Metric label="高频分类" value={report.topCategory ?? "暂无"} />
         </div>
         <div className="mt-6 rounded-2xl bg-white/70 p-5">
           <p className="text-sm font-bold text-zinc-500">AI 阶段总结</p>
-          <p className="mt-3 text-base leading-8 text-ink">{report.aiSummary}</p>
+          <p className="mt-3 whitespace-pre-line text-base leading-8 text-ink">{report.aiSummary}</p>
         </div>
         <div className="mt-5 rounded-2xl bg-ink p-5 text-white">
           <p className="text-sm font-bold text-white/70">下一步建议</p>
           <div className="mt-3 grid gap-2">
-            {report.nextSuggestions.map((suggestion) => (
+            {report.nextSuggestions.length ? report.nextSuggestions.map((suggestion) => (
               <p key={suggestion} className="flex items-center gap-2 text-sm">
                 <ArrowRight size={16} />
                 {suggestion}
               </p>
-            ))}
+            )) : (
+              <p className="text-sm text-white/70">正在生成更贴近你记录的建议...</p>
+            )}
           </div>
         </div>
       </section>
@@ -41,7 +43,7 @@ export function ReviewPanel({ report }: { report: ReviewReport }) {
         {report.representativeCards.length ? (
           report.representativeCards.map((card) => <LifeCardPreview key={card.id} card={card} compact />)
         ) : (
-          <div className="glass-card p-8 text-sm text-zinc-500">这一周期还没有卡片，下一次尝试会出现在这里。</div>
+          <div className="glass-card p-8 text-sm text-zinc-500">这一周期还没有卡片，下一次真实尝试会出现在这里。</div>
         )}
       </section>
     </div>

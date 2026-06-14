@@ -1,21 +1,20 @@
 # 人生支线 LifeQuest
 
-一个人生任务打卡小软件 MVP，把生活里的第一次、成长目标、关系节点和治愈瞬间，沉淀成可打卡、可记录、可复盘、可收藏的「人生卡」。
+LifeQuest 是一个人生任务打卡小软件 MVP。它把生活里的第一次、日常待办、成长目标、纪念节点和阶段复盘，沉淀成可回看的人生卡。
 
-当前版本是前端可演示 Demo：数据使用 `localStorage` 持久化，AI 能力使用 mock service 预留接口，方便后续接入真实大模型和 AI 绘图服务。
+当前版本是纯前端 Demo，使用 `localStorage` 保存数据；AI 能力支持 Mock 模式和 OpenAI 兼容 API 模式。未配置 API Key 时会自动 fallback 到 Mock。
 
 ## 功能特性
 
-- 首页人生进度盘：展示已完成人生卡、进行中愿望、本月完成数、最近纪念日、今日推荐任务。
-- 人生任务库：内置 30 条系统预设任务，覆盖第一次、勇气、关系、独处、成长、治愈 6 类。
-- 自定义任务：支持创建个人任务，并加入人生愿望清单。
-- 人生愿望清单：支持状态流转、分类筛选、重要程度筛选、置顶、删除、完成打卡。
-- 打卡流程：支持完成时间、地点、心情标签、文字感受、本地图片预览、纪念日标记、AI 纪念图提示词。
-- 人生卡详情：展示 AI 纪念文案、AI 绘图提示词、情绪标签、小日记编辑。
-- 纪念日：支持手动添加，也支持重要打卡自动转化为纪念日；包含正数日和倒数日。
-- 复盘回溯：支持日复盘、周复盘、月复盘、季复盘、年复盘，统计逻辑由前端真实计算。
-- 人生轨迹：按月份分组展示人生卡，支持分类、心情、时间排序筛选。
-- 设置页：支持昵称、复盘偏好、AI 模式占位、主题占位、导出 JSON、恢复演示数据。
+- 首页进度盘：收敛为欢迎区、今日概览、今日重点、最近完成和复盘入口。
+- 任务库：内置 30 条预设人生任务，改为左图右文的轻量列表卡片。
+- 待办事项：替代原 Wishlist，定位为每日待办，支持新增、编辑、删除、置顶、完成和转打卡。
+- 打卡页：支持完成时间、设备定位、自由填写今日情绪、文字感受、图片上传、纪念日标记、AI 生图。
+- 图片逻辑：用户上传图优先；未上传且勾选 AI 生图时调用图片 API；都没有时使用默认视觉卡。
+- 人生卡详情：展示用户上传图或 AI 生成图、AI 纪念文案、自由情绪、小日记和定位信息。
+- 纪念日：支持手动添加，也支持重要打卡自动转化为纪念日。
+- 复盘回溯：支持日/周/月/季/年复盘，AI 总结和下一步建议基于真实完成的人生卡生成。
+- 设置页：支持昵称、AI 模式、AI 共情/幽默/客观偏好、复盘偏好、导出 JSON、恢复演示数据。
 
 ## 技术栈
 
@@ -44,7 +43,7 @@ src/
   pages/
     Dashboard.tsx
     TaskLibrary.tsx
-    Wishlist.tsx
+    Todos.tsx
     CheckIn.tsx
     LifeCardDetail.tsx
     Anniversaries.tsx
@@ -97,7 +96,7 @@ http://127.0.0.1:5173/
 npm run build
 ```
 
-构建产物会输出到：
+构建产物输出到：
 
 ```text
 dist/
@@ -109,18 +108,29 @@ dist/
 npm run preview
 ```
 
-## 环境变量
+## AI API 配置
 
-当前 MVP 不需要环境变量。
+默认不需要环境变量。设置页选择 Mock 模式时，系统会使用本地 mock AI 逻辑。
 
-AI 能力目前在 `src/services/aiService.ts` 中使用 mock 实现。后续接入真实 API 时，建议新增：
+如果要启用真实 AI 文本 API 与 AI 生图 API，请在项目根目录创建 `.env`：
 
 ```text
-VITE_AI_API_BASE_URL=
-VITE_AI_API_KEY=
+VITE_AI_TEXT_API_BASE=
+VITE_AI_TEXT_API_KEY=
+VITE_AI_TEXT_MODEL=
+VITE_AI_IMAGE_API_BASE=
+VITE_AI_IMAGE_API_KEY=
+VITE_AI_IMAGE_MODEL=
 ```
 
-并在 `aiService.ts` 中根据设置页的 AI 模式切换 mock/API 请求。
+接口按 OpenAI 兼容风格封装：
+
+- 文本生成：`{VITE_AI_TEXT_API_BASE}/chat/completions`
+- 图片生成：`{VITE_AI_IMAGE_API_BASE}/images/generations`
+
+然后在设置页把 AI 模式切换为 `API 模式`。如果接口失败，系统会自动 fallback 到 Mock，不会中断打卡流程。
+
+注意：前端直连第三方 AI API 会暴露 Key，正式上线建议改为自建后端转发。
 
 ## 部署
 
@@ -142,7 +152,8 @@ npm run build
 dist
 ```
 
-5. 点击 Deploy。
+5. 如果需要真实 AI API，在 Vercel 的 Environment Variables 中配置 `VITE_AI_TEXT_*` 和 `VITE_AI_IMAGE_*`。
+6. 点击 Deploy。
 
 ### 部署到 Netlify
 
@@ -159,13 +170,14 @@ npm run build
 dist
 ```
 
-4. 点击 Deploy site。
+4. 如果需要真实 AI API，在 Netlify 的 Environment variables 中配置 `VITE_AI_TEXT_*` 和 `VITE_AI_IMAGE_*`。
+5. 点击 Deploy site。
 
 ### 部署到 GitHub Pages
 
 如果仓库使用 GitHub Pages，需要注意 Vite 的 `base` 路径。
 
-当前仓库名是 `-`，GitHub Pages 地址通常会类似：
+当前仓库名是 `-`，GitHub Pages 地址通常类似：
 
 ```text
 https://laonanren52-cell.github.io/-/
@@ -191,43 +203,28 @@ npm run build
 
 再把 `dist/` 发布到 GitHub Pages。可以使用 GitHub Actions，也可以使用 `gh-pages` 包。
 
-如果部署到自定义域名或 Vercel/Netlify，通常不需要设置 `base`。
-
-## 常用命令
-
-```bash
-# 安装依赖
-npm install
-
-# 本地开发
-npm run dev
-
-# 生产构建
-npm run build
-
-# 预览生产构建
-npm run preview
-```
+如果部署到自定义域名、Vercel 或 Netlify，通常不需要设置 `base`。
 
 ## 数据说明
 
 MVP 使用 `localStorage` 保存数据：
 
 - 任务数据
-- 愿望清单
+- 待办事项
 - 人生卡
 - 小日记
 - 纪念日
 - 复盘设置
 - 用户设置
+- AI 偏好
 
-首次进入系统时会自动初始化演示数据，包括 30 条预设任务、3 条愿望、5 张人生卡和 2 个纪念日。
+首次进入系统时会自动初始化演示数据，包括 30 条预设任务、3 条待办事项、5 张人生卡和 2 个纪念日。
 
 如需恢复演示数据，可以在设置页点击「清空并恢复演示数据」。
 
-## AI 接入说明
+## AI 逻辑说明
 
-当前 mock 函数位于：
+AI service 位于：
 
 ```text
 src/services/aiService.ts
@@ -236,18 +233,27 @@ src/services/aiService.ts
 包含：
 
 - `generateLifeCardText`
-- `generateImagePrompt`
+- `generateCardImage`
 - `generateReviewSummary`
 - `generateNextTaskSuggestions`
+- `buildLifeCardPrompt`
+- `buildImagePrompt`
 
-后续替换真实 API 时，推荐保持函数签名不变，只替换函数内部实现。这样页面层和数据层不需要大改。
+人生卡文案、复盘总结、下一步建议都会结合：
+
+- 任务标题
+- 任务分类
+- 用户真实感受
+- 用户自由填写的今日情绪
+- AI 偏好：共情、幽默、客观
 
 ## 注意事项
 
 - 当前版本是前端 MVP，没有后端账号系统。
 - 数据只保存在当前浏览器的 localStorage 中，换浏览器或清缓存后数据会丢失。
-- 图片上传目前使用本地预览，不会上传到服务器。
-- 设置页的 API 模式和夜间主题是预留入口，尚未接入完整实现。
+- 图片上传目前以 base64 存在 localStorage 中，适合 MVP 演示；生产环境建议接对象存储。
+- 前端直连第三方 AI API 会暴露 Key，正式上线建议改为自建后端转发。
+- 夜间主题是预留入口，尚未接入完整实现。
 
 ## License
 

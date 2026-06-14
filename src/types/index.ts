@@ -1,24 +1,21 @@
 export type Difficulty = "轻松" | "中等" | "挑战";
-export type TaskStatus = "preset" | "wishlist" | "doing" | "completed";
-export type WishlistStatus = "想做" | "进行中" | "已完成";
-export type MoodTag =
-  | "开心"
-  | "平静"
-  | "感动"
-  | "勇敢"
-  | "释然"
-  | "紧张"
-  | "孤独"
-  | "自由"
-  | "治愈"
-  | "成长";
+export type TaskStatus = "preset" | "todo" | "doing" | "completed";
+export type TodoStatus = "todo" | "completed";
 export type ReviewPeriod = "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
+export type ImageSource = "uploaded" | "ai" | "default";
+
+export type AIPreferences = {
+  empathy: number;
+  humor: number;
+  objectivity: number;
+};
 
 export type UserProfile = {
   id: string;
   nickname: string;
   theme: "warm" | "dark";
   aiMode: "mock" | "api";
+  aiPreferences: AIPreferences;
 };
 
 export type LifeTask = {
@@ -34,18 +31,17 @@ export type LifeTask = {
   createdAt: string;
 };
 
-export type WishlistItem = {
+export type TodoItem = {
   id: string;
-  taskId: string;
   title: string;
-  category: string;
-  difficulty: Difficulty;
-  description: string;
-  status: WishlistStatus;
-  isPinned: boolean;
-  isImportant: boolean;
+  description?: string;
+  date: string;
+  status: TodoStatus;
+  sourceTaskId?: string;
+  category?: string;
+  isPinned?: boolean;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 };
 
 export type LifeCard = {
@@ -53,12 +49,14 @@ export type LifeCard = {
   taskId: string;
   title: string;
   category: string;
-  moodTags: MoodTag[];
   note: string;
+  moodText: string;
   location?: string;
+  latitude?: number;
+  longitude?: number;
   completedAt: string;
   imageUrl?: string;
-  aiImagePrompt: string;
+  imageSource: ImageSource;
   aiGeneratedText: string;
   isAnniversary: boolean;
   anniversaryDate?: string;
@@ -70,7 +68,7 @@ export type DiaryEntry = {
   id: string;
   cardId: string;
   content: string;
-  moodTags: MoodTag[];
+  moodText: string;
   imageUrl?: string;
   updatedAt: string;
 };
@@ -94,11 +92,18 @@ export type ReviewSettings = {
   yearly: true;
 };
 
+export type ReviewSummaryInput = {
+  tasks: LifeTask[];
+  cards: LifeCard[];
+  aiPreferences: AIPreferences;
+  periodType: ReviewPeriod;
+};
+
 export type ReviewReport = {
   period: ReviewPeriod;
   title: string;
   cardCount: number;
-  topMood?: MoodTag;
+  topMood?: string;
   topCategory?: string;
   representativeCards: LifeCard[];
   aiSummary: string;
@@ -109,9 +114,11 @@ export type CheckInInput = {
   task: LifeTask;
   completedAt: string;
   location?: string;
-  moodTags: MoodTag[];
+  latitude?: number;
+  longitude?: number;
+  moodText: string;
   note: string;
-  imageUrl?: string;
+  uploadedImageUrl?: string;
   isAnniversary: boolean;
   shouldGenerateImage: boolean;
 };

@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { CalendarHeart, Image, Save, Sparkles } from "lucide-react";
-import { MoodTag, moodOptions } from "../components/MoodTag/MoodTag";
+import { CalendarHeart, Image, MapPin, Save, Sparkles } from "lucide-react";
+import { MoodPill, moodExamples } from "../components/MoodTag/MoodTag";
 import { useAppData } from "../services/AppDataContext";
-import type { DiaryEntry, MoodTag as MoodTagType } from "../types";
+import type { DiaryEntry } from "../types";
 import { createId } from "../utils/id";
 import { formatDate } from "../utils/date";
 
@@ -12,7 +12,7 @@ export function LifeCardDetail() {
   const { lifeCards, updateDiary } = useAppData();
   const card = useMemo(() => lifeCards.find((item) => item.id === cardId), [cardId, lifeCards]);
   const [content, setContent] = useState(card?.diary?.content ?? "");
-  const [moods, setMoods] = useState<MoodTagType[]>(card?.diary?.moodTags ?? card?.moodTags ?? []);
+  const [moodText, setMoodText] = useState(card?.diary?.moodText ?? card?.moodText ?? "");
 
   if (!card) {
     return <div className="page-shell"><div className="glass-card p-8">没有找到这张人生卡。</div></div>;
@@ -23,15 +23,11 @@ export function LifeCardDetail() {
       id: card!.diary?.id ?? createId("diary"),
       cardId: card!.id,
       content,
-      moodTags: moods,
+      moodText,
       imageUrl: card!.imageUrl,
       updatedAt: new Date().toISOString(),
     };
     updateDiary(card!.id, diary);
-  }
-
-  function toggleMood(mood: MoodTagType) {
-    setMoods((current) => (current.includes(mood) ? current.filter((item) => item !== mood) : [...current, mood]));
   }
 
   return (
@@ -39,15 +35,13 @@ export function LifeCardDetail() {
       <section className="glass-card overflow-hidden">
         <div className="relative min-h-[520px] bg-gradient-to-br from-blush via-cream to-skysoft p-7">
           {card.imageUrl ? <img src={card.imageUrl} alt={card.title} className="absolute inset-0 h-full w-full object-cover" /> : null}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/55 to-white/10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-white/10" />
           <div className="relative flex min-h-[460px] flex-col justify-between">
             <div className="flex items-center justify-between gap-3">
-              <span className="rounded-full bg-white/80 px-4 py-2 text-xs font-black text-ink">{card.category}</span>
-              {card.isAnniversary ? (
-                <Link to="/anniversaries" className="rounded-full bg-ink px-4 py-2 text-xs font-black text-white">
-                  纪念日
-                </Link>
-              ) : null}
+              <span className="rounded-full bg-white/85 px-4 py-2 text-xs font-black text-ink">{card.category}</span>
+              <span className="rounded-full bg-ink px-4 py-2 text-xs font-black text-white">
+                {card.imageSource === "uploaded" ? "用户照片" : card.imageSource === "ai" ? "AI 生成图" : "默认卡片"}
+              </span>
             </div>
             <div>
               <p className="mb-3 flex items-center gap-2 text-sm font-bold text-zinc-600">
@@ -63,35 +57,42 @@ export function LifeCardDetail() {
 
       <section className="space-y-5">
         <div className="glass-card p-6">
-          <div className="flex flex-wrap gap-2">
-            {card.moodTags.map((mood) => (
-              <MoodTag key={mood} mood={mood} />
-            ))}
-          </div>
-          <div className="mt-5 grid gap-3 text-sm text-zinc-600 sm:grid-cols-2">
+          <p className="mb-4 inline-flex rounded-full bg-orange-50 px-3 py-1 text-sm font-bold text-orange-700">{card.moodText}</p>
+          <div className="grid gap-3 text-sm text-zinc-600 sm:grid-cols-2">
             <p><span className="font-bold text-ink">完成时间：</span>{formatDate(card.completedAt, true)}</p>
             <p><span className="font-bold text-ink">地点：</span>{card.location || "未记录"}</p>
             <p><span className="font-bold text-ink">原始感受：</span>{card.note}</p>
             <p className="flex items-center gap-2"><CalendarHeart size={17} />{card.isAnniversary ? "已转化为纪念日" : "普通人生卡"}</p>
+            {card.latitude && card.longitude ? (
+              <p className="flex items-center gap-2 sm:col-span-2"><MapPin size={17} />经纬度：{card.latitude}, {card.longitude}</p>
+            ) : null}
           </div>
+          {card.isAnniversary ? (
+            <Link to="/anniversaries" className="secondary-button mt-5">查看纪念日</Link>
+          ) : null}
         </div>
 
         <div className="glass-card p-6">
           <p className="mb-3 flex items-center gap-2 text-sm font-black text-coral">
             <Image size={17} />
-            AI 绘图提示词
+            图片记录
           </p>
-          <p className="rounded-2xl bg-white/75 p-4 text-sm leading-7 text-zinc-700">{card.aiImagePrompt}</p>
+          <p className="text-sm leading-7 text-zinc-600">
+            {card.imageSource === "uploaded"
+              ? "这张人生卡使用了你上传的真实照片。"
+              : card.imageSource === "ai"
+                ? "这张人生卡使用 AI 根据任务、感受和情绪生成的纪念图。"
+                : "这张人生卡使用默认温暖视觉背景。"}
+          </p>
         </div>
 
         <div className="glass-card p-6">
           <h2 className="section-title">小日记</h2>
           <p className="mt-2 text-sm text-zinc-500">写下这一刻的真实感受。多年后再看到这张卡，你会想起今天的自己。</p>
           <textarea className="soft-input mt-4 min-h-36" value={content} onChange={(event) => setContent(event.target.value)} />
-          <div className="mt-4 flex flex-wrap gap-2">
-            {moodOptions.map((mood) => (
-              <MoodTag key={mood} mood={mood} selected={moods.includes(mood)} onClick={() => toggleMood(mood)} />
-            ))}
+          <input className="soft-input mt-3" value={moodText} onChange={(event) => setMoodText(event.target.value)} placeholder="补充这一刻的情绪" />
+          <div className="mt-3 flex flex-wrap gap-2">
+            {moodExamples.map((item) => <MoodPill key={item} text={item} selected={moodText === item} onClick={() => setMoodText(item)} />)}
           </div>
           <button className="primary-button mt-5" type="button" onClick={saveDiary}>
             <Save size={18} />

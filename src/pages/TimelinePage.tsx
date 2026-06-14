@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { ArrowDownAZ, Filter } from "lucide-react";
 import { TimelineList } from "../components/Timeline/TimelineList";
-import { moodOptions } from "../components/MoodTag/MoodTag";
 import { taskCategories } from "../data/presetTasks";
 import { useAppData } from "../services/AppDataContext";
 
@@ -10,12 +9,13 @@ export function TimelinePage() {
   const [category, setCategory] = useState("全部");
   const [mood, setMood] = useState("全部");
   const [order, setOrder] = useState<"desc" | "asc">("desc");
+  const moodOptions = useMemo(() => [...new Set(lifeCards.map((card) => card.moodText).filter(Boolean))], [lifeCards]);
 
   const cards = useMemo(
     () =>
       lifeCards
         .filter((card) => category === "全部" || card.category === category)
-        .filter((card) => mood === "全部" || card.moodTags.includes(mood as never))
+        .filter((card) => mood === "全部" || card.moodText === mood || card.moodText.includes(mood))
         .sort((a, b) => (order === "desc" ? +new Date(b.completedAt) - +new Date(a.completedAt) : +new Date(a.completedAt) - +new Date(b.completedAt))),
     [category, lifeCards, mood, order],
   );
@@ -24,7 +24,7 @@ export function TimelinePage() {
     <div className="page-shell space-y-6">
       <section className="glass-card p-6">
         <p className="text-sm font-bold text-coral">人生轨迹</p>
-        <h1 className="section-title mt-2">按月份回看你的卡片墙</h1>
+        <h1 className="section-title mt-2">按月份回看你的真实记录</h1>
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
           <label className="relative">
             <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />

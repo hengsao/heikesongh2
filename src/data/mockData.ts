@@ -1,5 +1,5 @@
 import { presetTasks } from "./presetTasks";
-import type { Anniversary, LifeCard, UserProfile, WishlistItem } from "../types";
+import type { Anniversary, LifeCard, TodoItem, UserProfile } from "../types";
 
 const today = new Date();
 const daysAgo = (days: number, hour = 20) => {
@@ -9,52 +9,56 @@ const daysAgo = (days: number, hour = 20) => {
   return date.toISOString();
 };
 
+const todayDate = today.toISOString().slice(0, 10);
+
+export const defaultAIPreferences = {
+  empathy: 72,
+  humor: 24,
+  objectivity: 48,
+};
+
 export const defaultProfile: UserProfile = {
   id: "user_default",
   nickname: "小支线玩家",
   theme: "warm",
   aiMode: "mock",
+  aiPreferences: defaultAIPreferences,
 };
 
-export const mockWishlist: WishlistItem[] = [
+export const mockTodos: TodoItem[] = [
   {
-    id: "wish_1",
-    taskId: "preset_成长清单_0",
-    title: "学会一个新技能",
-    category: "成长清单",
-    difficulty: "挑战",
-    description: "这个月想认真学会剪一支完整的短视频。",
-    status: "进行中",
+    id: "todo_1",
+    title: "拍一张今天的天空",
+    description: "下课或下班路上，抬头找一小块让你停下来的天空。",
+    date: todayDate,
+    status: "todo",
+    sourceTaskId: "preset_治愈清单_0",
+    category: "治愈清单",
     isPinned: true,
-    isImportant: true,
-    createdAt: daysAgo(12),
+    createdAt: daysAgo(1),
+    updatedAt: daysAgo(1),
+  },
+  {
+    id: "todo_2",
+    title: "一个人散步 30 分钟",
+    description: "不用赶路，只是把今天的脑子慢慢放松下来。",
+    date: todayDate,
+    status: "todo",
+    sourceTaskId: "preset_独处清单_0",
+    category: "独处清单",
+    createdAt: daysAgo(2),
     updatedAt: daysAgo(2),
   },
   {
-    id: "wish_2",
-    taskId: "preset_关系清单_3",
-    title: "给重要的人写一封信",
+    id: "todo_3",
+    title: "给很久没联系的人发一句问候",
+    description: "不用很长，一句“最近怎么样”就很好。",
+    date: todayDate,
+    status: "completed",
+    sourceTaskId: "preset_关系清单_2",
     category: "关系清单",
-    difficulty: "中等",
-    description: "把一直没说出口的感谢写下来。",
-    status: "想做",
-    isPinned: false,
-    isImportant: true,
-    createdAt: daysAgo(8),
-    updatedAt: daysAgo(8),
-  },
-  {
-    id: "wish_3",
-    taskId: "preset_独处清单_2",
-    title: "一个人看日落",
-    category: "独处清单",
-    difficulty: "轻松",
-    description: "找一个不用赶路的傍晚，看太阳慢慢落下去。",
-    status: "想做",
-    isPinned: false,
-    isImportant: false,
     createdAt: daysAgo(3),
-    updatedAt: daysAgo(3),
+    updatedAt: daysAgo(0, 10),
   },
 ];
 
@@ -64,12 +68,12 @@ export const mockLifeCards: LifeCard[] = [
     taskId: "preset_独处清单_3",
     title: "第一次一个人吃火锅",
     category: "独处清单",
-    moodTags: ["自由", "平静"],
+    moodText: "有点紧张但后来很自由",
     note: "一开始有点尴尬，后来发现一个人慢慢吃也很自在。",
     location: "学校附近的小火锅店",
     completedAt: daysAgo(1, 19),
-    aiGeneratedText: "一个人的火锅，也可以很热闹。你把生活的声音调小了一点，却听见了自己的自在。",
-    aiImagePrompt: "温暖治愈风插画，一个人坐在窗边火锅店，桌上有热气腾腾的火锅，夜晚城市灯光，情绪自由、安静、温暖。",
+    imageSource: "default",
+    aiGeneratedText: "第一次一个人坐下来吃火锅，最开始那点不自然没有被你躲开。你还是慢慢吃完了这一餐，也把“一个人”从尴尬里吃成了自由。",
     isAnniversary: true,
     anniversaryDate: daysAgo(1, 19),
     createdAt: daysAgo(1, 19),
@@ -77,7 +81,7 @@ export const mockLifeCards: LifeCard[] = [
       id: "diary_1",
       cardId: "card_1",
       content: "多年后看到这张卡，希望我还记得今晚那种不必解释的轻松。",
-      moodTags: ["自由", "平静"],
+      moodText: "自由、平静",
       updatedAt: daysAgo(1, 21),
     },
   },
@@ -86,12 +90,13 @@ export const mockLifeCards: LifeCard[] = [
     taskId: "preset_治愈清单_0",
     title: "拍一张今天的天空",
     category: "治愈清单",
-    moodTags: ["治愈", "开心"],
+    moodText: "被蓝色治愈了一下",
     note: "下课路上抬头看见很干净的蓝色，突然觉得今天也不错。",
     location: "教学楼旁",
     completedAt: daysAgo(4, 17),
-    aiGeneratedText: "你没有错过今天。那一小块蓝色，像生活偷偷递来的便签。",
-    aiImagePrompt: "柔和天空蓝插画，校园傍晚，云层轻盈，画面安静明亮，适合人生纪念卡封面。",
+    imageUrl: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+    imageSource: "uploaded",
+    aiGeneratedText: "你没有错过今天的天空。那一小块干净的蓝色，像生活偷偷递来的便签，提醒你普通日子里也会有很轻的光。",
     isAnniversary: false,
     createdAt: daysAgo(4, 17),
   },
@@ -100,12 +105,12 @@ export const mockLifeCards: LifeCard[] = [
     taskId: "preset_关系清单_0",
     title: "给父母做一顿饭",
     category: "关系清单",
-    moodTags: ["感动", "成长"],
+    moodText: "感动，也有点不好意思",
     note: "番茄炒蛋有点咸，但他们一直说很好吃。",
     location: "家里",
     completedAt: daysAgo(10, 12),
-    aiGeneratedText: "有些爱不用做得完美。今天的你，把心意端上了餐桌。",
-    aiImagePrompt: "温暖家庭厨房插画，一桌简单家常菜，柔和灯光，画面有烟火气和亲密感。",
+    imageSource: "default",
+    aiGeneratedText: "这顿饭不需要完美才值得被记住。番茄炒蛋有点咸，但你把心意端上桌的那一刻，家里的灯光就已经很暖了。",
     isAnniversary: true,
     anniversaryDate: daysAgo(10, 12),
     createdAt: daysAgo(10, 12),
@@ -115,12 +120,12 @@ export const mockLifeCards: LifeCard[] = [
     taskId: "preset_独处清单_1",
     title: "一个人去书店",
     category: "独处清单",
-    moodTags: ["平静", "治愈"],
+    moodText: "安静、慢下来",
     note: "没有买很多书，只是在书架之间慢慢走了一圈。",
     location: "城市书房",
     completedAt: daysAgo(16, 15),
-    aiGeneratedText: "你给自己留了一段不被打扰的时间。书页很轻，心也跟着慢下来。",
-    aiImagePrompt: "温暖书店插画，木色书架，午后自然光，一个人安静翻书，治愈感。",
+    imageSource: "default",
+    aiGeneratedText: "你给自己留了一段不被打扰的时间。一个人走在书架之间，像把今天的音量调低了一格，心也跟着慢下来。",
     isAnniversary: false,
     createdAt: daysAgo(16, 15),
   },
@@ -129,11 +134,11 @@ export const mockLifeCards: LifeCard[] = [
     taskId: "preset_治愈清单_1",
     title: "写一句给未来自己的话",
     category: "治愈清单",
-    moodTags: ["释然", "成长"],
+    moodText: "释然，想继续往前",
     note: "别急，慢慢来，你已经在路上了。",
     completedAt: daysAgo(28, 22),
-    aiGeneratedText: "今天的这句话像一颗小种子。它不催你长大，只提醒你别忘了继续走。",
-    aiImagePrompt: "柔粉与浅紫渐变插画，纸条、星光、小植物，温柔成长主题。",
+    imageSource: "default",
+    aiGeneratedText: "这句话像一颗小种子。它不催你马上变好，只是温柔地提醒：你已经在路上了，可以慢慢来。",
     isAnniversary: false,
     createdAt: daysAgo(28, 22),
   },
@@ -163,6 +168,6 @@ export const mockAnniversaries: Anniversary[] = [
 
 export const seededTasks = presetTasks.map((task) => {
   if (mockLifeCards.some((card) => card.taskId === task.id)) return { ...task, status: "completed" as const };
-  if (mockWishlist.some((item) => item.taskId === task.id)) return { ...task, status: "wishlist" as const };
+  if (mockTodos.some((item) => item.sourceTaskId === task.id && item.status !== "completed")) return { ...task, status: "todo" as const };
   return task;
 });

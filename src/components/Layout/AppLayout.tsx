@@ -5,7 +5,7 @@ import { useAppData } from "../../services/AppDataContext";
 const navItems = [
   { to: "/", label: "进度盘", icon: Home },
   { to: "/tasks", label: "任务库", icon: Compass },
-  { to: "/wishlist", label: "愿望", icon: ListChecks },
+  { to: "/todos", label: "待办", icon: ListChecks },
   { to: "/timeline", label: "轨迹", icon: TimerReset },
   { to: "/reviews", label: "复盘", icon: BookOpen },
   { to: "/anniversaries", label: "纪念日", icon: CalendarHeart },

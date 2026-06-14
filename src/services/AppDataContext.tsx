@@ -1,19 +1,19 @@
 import { createContext, useContext, useMemo, useState } from "react";
-import { generateImagePrompt, generateLifeCardText } from "./aiService";
+import { generateCardImage, generateLifeCardText } from "./aiService";
 import {
   getAnniversaries,
   getLifeCards,
   getProfile,
   getReviewSettings,
   getTasks,
-  getWishlist,
+  getTodos,
   resetStorage,
   saveAnniversaries,
   saveLifeCards,
   saveProfile,
   saveReviewSettings,
   saveTasks,
-  saveWishlist,
+  saveTodos,
 } from "./storageService";
 import type {
   Anniversary,
@@ -22,28 +22,28 @@ import type {
   LifeCard,
   LifeTask,
   ReviewSettings,
+  TodoItem,
   UserProfile,
-  WishlistItem,
-  WishlistStatus,
 } from "../types";
 import { createId } from "../utils/id";
 
 type AppDataContextValue = {
   profile: UserProfile;
   tasks: LifeTask[];
-  wishlist: WishlistItem[];
+  todos: TodoItem[];
   lifeCards: LifeCard[];
   anniversaries: Anniversary[];
   reviewSettings: ReviewSettings;
   updateProfile: (profile: UserProfile) => void;
   updateReviewSettings: (settings: ReviewSettings) => void;
   createCustomTask: (task: Omit<LifeTask, "id" | "status" | "isCustom" | "createdAt">) => LifeTask;
-  addTaskToWishlist: (task: LifeTask) => void;
-  updateWishlistStatus: (id: string, status: WishlistStatus) => void;
-  updateWishlistItem: (item: WishlistItem) => void;
-  removeWishlistItem: (id: string) => void;
-  toggleWishlistPin: (id: string) => void;
-  createLifeCard: (input: CheckInInput) => LifeCard;
+  addTaskToTodos: (task: LifeTask, date?: string) => void;
+  createTodo: (input: Pick<TodoItem, "title" | "description" | "date">) => TodoItem;
+  updateTodo: (item: TodoItem) => void;
+  completeTodo: (id: string) => void;
+  removeTodo: (id: string) => void;
+  toggleTodoPin: (id: string) => void;
+  createLifeCard: (input: CheckInInput) => Promise<LifeCard>;
   updateDiary: (cardId: string, diary: DiaryEntry) => void;
   addAnniversary: (anniversary: Omit<Anniversary, "id" | "createdAt">) => void;
   resetAllData: () => void;
@@ -54,7 +54,7 @@ const AppDataContext = createContext<AppDataContextValue | null>(null);
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState(getProfile);
   const [tasks, setTasks] = useState(getTasks);
-  const [wishlist, setWishlist] = useState(getWishlist);
+  const [todos, setTodos] = useState(getTodos);
   const [lifeCards, setLifeCards] = useState(getLifeCards);
   const [anniversaries, setAnniversaries] = useState(getAnniversaries);
   const [reviewSettings, setReviewSettings] = useState(getReviewSettings);
@@ -63,7 +63,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     () => ({
       profile,
       tasks,
-      wishlist,
+      todos,
       lifeCards,
       anniversaries,
       reviewSettings,
@@ -89,79 +89,105 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         saveTasks(nextTasks);
         return task;
       },
-      addTaskToWishlist(task) {
-        if (wishlist.some((item) => item.taskId === task.id && item.status !== "已完成")) return;
+      addTaskToTodos(task, date = new Date().toISOString().slice(0, 10)) {
+        if (todos.some((item) => item.sourceTaskId === task.id && item.date === date && item.status !== "completed")) return;
         const now = new Date().toISOString();
-        const item: WishlistItem = {
-          id: createId("wish"),
-          taskId: task.id,
+        const item: TodoItem = {
+          id: createId("todo"),
           title: task.title,
-          category: task.category,
-          difficulty: task.difficulty,
           description: task.description,
-          status: "想做",
+          date,
+          status: "todo",
+          sourceTaskId: task.id,
+          category: task.category,
           isPinned: false,
-          isImportant: Boolean(task.isImportant),
           createdAt: now,
           updatedAt: now,
         };
-        const nextWishlist = [item, ...wishlist];
-        const nextTasks = tasks.map((current) => (current.id === task.id ? { ...current, status: "wishlist" as const } : current));
-        setWishlist(nextWishlist);
+        const nextTodos = [item, ...todos];
+        const nextTasks = tasks.map((current) => (current.id === task.id ? { ...current, status: "todo" as const } : current));
+        setTodos(nextTodos);
         setTasks(nextTasks);
-        saveWishlist(nextWishlist);
+        saveTodos(nextTodos);
         saveTasks(nextTasks);
       },
-      updateWishlistStatus(id, status) {
-        const nextWishlist = wishlist.map((item) =>
-          item.id === id ? { ...item, status, updatedAt: new Date().toISOString() } : item,
-        );
-        setWishlist(nextWishlist);
-        saveWishlist(nextWishlist);
+      createTodo(input) {
+        const now = new Date().toISOString();
+        const item: TodoItem = {
+          id: createId("todo"),
+          title: input.title,
+          description: input.description,
+          date: input.date,
+          status: "todo",
+          createdAt: now,
+          updatedAt: now,
+        };
+        const nextTodos = [item, ...todos];
+        setTodos(nextTodos);
+        saveTodos(nextTodos);
+        return item;
       },
-      updateWishlistItem(item) {
-        const nextWishlist = wishlist.map((current) =>
+      updateTodo(item) {
+        const nextTodos = todos.map((current) =>
           current.id === item.id ? { ...item, updatedAt: new Date().toISOString() } : current,
         );
-        setWishlist(nextWishlist);
-        saveWishlist(nextWishlist);
+        setTodos(nextTodos);
+        saveTodos(nextTodos);
       },
-      removeWishlistItem(id) {
-        const item = wishlist.find((current) => current.id === id);
-        const nextWishlist = wishlist.filter((current) => current.id !== id);
-        const nextTasks = item
-          ? tasks.map((task) => (task.id === item.taskId && task.status === "wishlist" ? { ...task, status: "preset" as const } : task))
+      completeTodo(id) {
+        const nextTodos = todos.map((item) =>
+          item.id === id ? { ...item, status: "completed" as const, updatedAt: new Date().toISOString() } : item,
+        );
+        setTodos(nextTodos);
+        saveTodos(nextTodos);
+      },
+      removeTodo(id) {
+        const item = todos.find((current) => current.id === id);
+        const nextTodos = todos.filter((current) => current.id !== id);
+        const nextTasks = item?.sourceTaskId
+          ? tasks.map((task) => (task.id === item.sourceTaskId && task.status === "todo" ? { ...task, status: "preset" as const } : task))
           : tasks;
-        setWishlist(nextWishlist);
+        setTodos(nextTodos);
         setTasks(nextTasks);
-        saveWishlist(nextWishlist);
+        saveTodos(nextTodos);
         saveTasks(nextTasks);
       },
-      toggleWishlistPin(id) {
-        const nextWishlist = wishlist.map((item) => (item.id === id ? { ...item, isPinned: !item.isPinned } : item));
-        setWishlist(nextWishlist);
-        saveWishlist(nextWishlist);
+      toggleTodoPin(id) {
+        const nextTodos = todos.map((item) => (item.id === id ? { ...item, isPinned: !item.isPinned } : item));
+        setTodos(nextTodos);
+        saveTodos(nextTodos);
       },
-      createLifeCard(input) {
+      async createLifeCard(input) {
         const aiInput = {
           title: input.task.title,
           category: input.task.category,
           note: input.note,
-          moodTags: input.moodTags,
+          moodText: input.moodText,
+          preferences: profile.aiPreferences,
+          aiMode: profile.aiMode,
         };
         const now = new Date().toISOString();
+        const aiGeneratedText = await generateLifeCardText(aiInput);
+        const aiImageUrl = input.uploadedImageUrl
+          ? undefined
+          : await generateCardImage({ ...aiInput, shouldGenerateImage: input.shouldGenerateImage });
+        const imageUrl = input.uploadedImageUrl ?? aiImageUrl;
+        const imageSource = input.uploadedImageUrl ? "uploaded" : aiImageUrl ? "ai" : "default";
+
         const card: LifeCard = {
           id: createId("card"),
           taskId: input.task.id,
           title: input.task.title,
           category: input.task.category,
-          moodTags: input.moodTags,
           note: input.note,
+          moodText: input.moodText,
           location: input.location,
+          latitude: input.latitude,
+          longitude: input.longitude,
           completedAt: new Date(input.completedAt).toISOString(),
-          imageUrl: input.imageUrl,
-          aiGeneratedText: generateLifeCardText(aiInput),
-          aiImagePrompt: input.shouldGenerateImage ? generateImagePrompt(aiInput) : "本次未开启 AI 纪念图生成。",
+          imageUrl,
+          imageSource,
+          aiGeneratedText,
           isAnniversary: input.isAnniversary,
           anniversaryDate: input.isAnniversary ? new Date(input.completedAt).toISOString() : undefined,
           createdAt: now,
@@ -169,8 +195,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
             id: createId("diary"),
             cardId: "",
             content: input.note,
-            moodTags: input.moodTags,
-            imageUrl: input.imageUrl,
+            moodText: input.moodText,
+            imageUrl,
             updatedAt: now,
           },
         };
@@ -178,8 +204,10 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
 
         const nextCards = [card, ...lifeCards];
         const nextTasks = tasks.map((task) => (task.id === input.task.id ? { ...task, status: "completed" as const } : task));
-        const nextWishlist = wishlist.map((item) =>
-          item.taskId === input.task.id ? { ...item, status: "已完成" as const, updatedAt: now } : item,
+        const nextTodos = todos.map((item) =>
+          item.sourceTaskId === input.task.id || item.title === input.task.title
+            ? { ...item, status: "completed" as const, updatedAt: now }
+            : item,
         );
         const nextAnniversaries = input.isAnniversary
           ? [
@@ -199,11 +227,11 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
 
         setLifeCards(nextCards);
         setTasks(nextTasks);
-        setWishlist(nextWishlist);
+        setTodos(nextTodos);
         setAnniversaries(nextAnniversaries);
         saveLifeCards(nextCards);
         saveTasks(nextTasks);
-        saveWishlist(nextWishlist);
+        saveTodos(nextTodos);
         saveAnniversaries(nextAnniversaries);
         return card;
       },
@@ -226,13 +254,13 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         resetStorage();
         setProfile(getProfile());
         setTasks(getTasks());
-        setWishlist(getWishlist());
+        setTodos(getTodos());
         setLifeCards(getLifeCards());
         setAnniversaries(getAnniversaries());
         setReviewSettings(getReviewSettings());
       },
     }),
-    [anniversaries, lifeCards, profile, reviewSettings, tasks, wishlist],
+    [anniversaries, lifeCards, profile, reviewSettings, tasks, todos],
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;
