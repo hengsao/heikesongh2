@@ -1,4 +1,4 @@
-import { defaultAIPreferences, defaultProfile, mockAnniversaries, mockLifeCards, mockTodos, seededTasks } from "../data/mockData";
+import { defaultAIApiConfig, defaultAIPreferences, defaultProfile, mockAnniversaries, mockLifeCards, mockTodos, seededTasks } from "../data/mockData";
 import type { Anniversary, LifeCard, LifeTask, ReviewSettings, TodoItem, UserProfile } from "../types";
 
 const keys = {
@@ -80,6 +80,7 @@ export function getProfile() {
     ...defaultProfile,
     ...profile,
     aiPreferences: { ...defaultAIPreferences, ...(profile as Partial<UserProfile>).aiPreferences },
+    aiApiConfig: { ...defaultAIApiConfig, ...(profile as Partial<UserProfile>).aiApiConfig },
   };
 }
 
@@ -87,6 +88,7 @@ export function saveProfile(value: UserProfile) {
   write(keys.profile, {
     ...value,
     aiPreferences: { ...defaultAIPreferences, ...value.aiPreferences },
+    aiApiConfig: { ...defaultAIApiConfig, ...value.aiApiConfig },
   });
 }
 

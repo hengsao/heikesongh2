@@ -17,12 +17,22 @@ export const defaultAIPreferences = {
   objectivity: 48,
 };
 
+export const defaultAIApiConfig = {
+  textApiBase: "",
+  textApiKey: "",
+  textModel: "gpt-4o-mini",
+  imageApiBase: "",
+  imageApiKey: "",
+  imageModel: "gpt-image-1",
+};
+
 export const defaultProfile: UserProfile = {
   id: "user_default",
   nickname: "小支线玩家",
   theme: "warm",
   aiMode: "mock",
   aiPreferences: defaultAIPreferences,
+  aiApiConfig: defaultAIApiConfig,
 };
 
 export const mockTodos: TodoItem[] = [

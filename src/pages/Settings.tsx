@@ -1,6 +1,7 @@
-import { Download, RefreshCcw, Save } from "lucide-react";
+import { Download, PlugZap, RefreshCcw, Save } from "lucide-react";
 import { useState } from "react";
 import { useAppData } from "../services/AppDataContext";
+import { testImageApiConnection, testTextApiConnection } from "../services/aiService";
 import { exportAllData } from "../services/storageService";
 
 export function Settings() {
@@ -9,9 +10,41 @@ export function Settings() {
   const [aiMode, setAiMode] = useState(profile.aiMode);
   const [theme, setTheme] = useState(profile.theme);
   const [aiPreferences, setAiPreferences] = useState(profile.aiPreferences);
+  const [aiApiConfig, setAiApiConfig] = useState(profile.aiApiConfig);
+  const [apiTestMessage, setApiTestMessage] = useState("");
+  const [testingApi, setTestingApi] = useState<"text" | "image" | null>(null);
 
   function saveProfile() {
-    updateProfile({ ...profile, nickname, aiMode, theme, aiPreferences });
+    updateProfile({ ...profile, nickname, aiMode, theme, aiPreferences, aiApiConfig });
+    setApiTestMessage("AI 配置已保存。切换到 API 模式后，打卡和复盘会优先使用在线接口。");
+  }
+
+  async function testTextApi() {
+    updateProfile({ ...profile, nickname, aiMode: "api", theme, aiPreferences, aiApiConfig });
+    setTestingApi("text");
+    setApiTestMessage("正在测试文本 API...");
+    try {
+      const result = await testTextApiConnection();
+      setApiTestMessage(`文本 API 连接成功：${result}`);
+    } catch (error) {
+      setApiTestMessage(error instanceof Error ? error.message : "文本 API 测试失败。");
+    } finally {
+      setTestingApi(null);
+    }
+  }
+
+  async function testImageApi() {
+    updateProfile({ ...profile, nickname, aiMode: "api", theme, aiPreferences, aiApiConfig });
+    setTestingApi("image");
+    setApiTestMessage("正在测试生图 API...");
+    try {
+      await testImageApiConnection();
+      setApiTestMessage("生图 API 连接成功，已经拿到图片返回。");
+    } catch (error) {
+      setApiTestMessage(error instanceof Error ? error.message : "生图 API 测试失败。");
+    } finally {
+      setTestingApi(null);
+    }
   }
 
   function exportJson() {
@@ -76,15 +109,71 @@ export function Settings() {
           <Toggle label="季复盘" checked disabled />
           <Toggle label="年复盘" checked disabled />
         </div>
-        <div className="glass-card p-6">
-          <h2 className="text-lg font-black text-ink">AI API 配置</h2>
-          <p className="mt-3 text-sm leading-7 text-zinc-600">在项目根目录创建 `.env` 后可启用真实 API 模式：</p>
-          <pre className="mt-4 overflow-x-auto rounded-2xl bg-ink p-4 text-xs leading-6 text-white">{`VITE_AI_TEXT_API_BASE=
-VITE_AI_TEXT_API_KEY=
-VITE_AI_TEXT_MODEL=
-VITE_AI_IMAGE_API_BASE=
-VITE_AI_IMAGE_API_KEY=
-VITE_AI_IMAGE_MODEL=`}</pre>
+        <div className="glass-card space-y-4 p-6">
+          <h2 className="text-lg font-black text-ink">在线 AI API 配置</h2>
+          <p className="text-sm leading-7 text-zinc-600">
+            这里保存的是浏览器本地配置，适合在线演示时直接接入 OpenAI 兼容接口。正式上线建议改成后端转发，避免 Key 暴露。
+          </p>
+          <div className="grid gap-3">
+            <input
+              className="soft-input"
+              placeholder="文本 API Base，例如：https://api.openai.com/v1"
+              value={aiApiConfig.textApiBase}
+              onChange={(event) => setAiApiConfig({ ...aiApiConfig, textApiBase: event.target.value })}
+            />
+            <input
+              className="soft-input"
+              type="password"
+              placeholder="文本 API Key"
+              value={aiApiConfig.textApiKey}
+              onChange={(event) => setAiApiConfig({ ...aiApiConfig, textApiKey: event.target.value })}
+            />
+            <input
+              className="soft-input"
+              placeholder="文本模型，例如：gpt-4o-mini"
+              value={aiApiConfig.textModel}
+              onChange={(event) => setAiApiConfig({ ...aiApiConfig, textModel: event.target.value })}
+            />
+            <input
+              className="soft-input"
+              placeholder="生图 API Base，例如：https://api.openai.com/v1"
+              value={aiApiConfig.imageApiBase}
+              onChange={(event) => setAiApiConfig({ ...aiApiConfig, imageApiBase: event.target.value })}
+            />
+            <input
+              className="soft-input"
+              type="password"
+              placeholder="生图 API Key"
+              value={aiApiConfig.imageApiKey}
+              onChange={(event) => setAiApiConfig({ ...aiApiConfig, imageApiKey: event.target.value })}
+            />
+            <input
+              className="soft-input"
+              placeholder="生图模型，例如：gpt-image-1"
+              value={aiApiConfig.imageModel}
+              onChange={(event) => setAiApiConfig({ ...aiApiConfig, imageModel: event.target.value })}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button className="primary-button" type="button" onClick={saveProfile}>
+              <Save size={18} />
+              保存 API 配置
+            </button>
+            <button className="secondary-button" type="button" onClick={testTextApi} disabled={testingApi !== null}>
+              <PlugZap size={18} />
+              {testingApi === "text" ? "测试中..." : "测试文本 API"}
+            </button>
+            <button className="secondary-button" type="button" onClick={testImageApi} disabled={testingApi !== null}>
+              <PlugZap size={18} />
+              {testingApi === "image" ? "测试中..." : "测试生图 API"}
+            </button>
+          </div>
+          {apiTestMessage ? <p className="rounded-2xl bg-orange-50 p-4 text-sm leading-7 text-orange-900">{apiTestMessage}</p> : null}
+          <pre className="overflow-x-auto rounded-2xl bg-ink p-4 text-xs leading-6 text-white">{`接口路径：
+文本：{Base}/chat/completions
+生图：{Base}/images/generations
+
+.env 仍然可用，但在线配置会优先生效。`}</pre>
         </div>
       </section>
 

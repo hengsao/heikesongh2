@@ -112,7 +112,14 @@ npm run preview
 
 默认不需要环境变量。设置页选择 Mock 模式时，系统会使用本地 mock AI 逻辑。
 
-如果要启用真实 AI 文本 API 与 AI 生图 API，请在项目根目录创建 `.env`：
+现在支持两种真实 API 接入方式：
+
+1. 在线填写：部署后直接进入「设置 → 在线 AI API 配置」，填写 Base、Key、Model，点击「保存 API 配置」，再测试文本 API / 生图 API。
+2. 构建时注入：在项目根目录创建 `.env`，或在 Vercel / Netlify 配置环境变量。
+
+在线填写会保存在当前浏览器的 localStorage 中，并优先于 `.env` 生效，适合演示和个人使用。
+
+如果要使用 `.env`，可以参考 `.env.example`：
 
 ```text
 VITE_AI_TEXT_API_BASE=
@@ -130,7 +137,11 @@ VITE_AI_IMAGE_MODEL=
 
 然后在设置页把 AI 模式切换为 `API 模式`。如果接口失败，系统会自动 fallback 到 Mock，不会中断打卡流程。
 
-注意：前端直连第三方 AI API 会暴露 Key，正式上线建议改为自建后端转发。
+注意：
+
+- 前端直连第三方 AI API 会暴露 Key，正式上线建议改为自建后端转发。
+- 有些 API 服务不允许浏览器跨域请求。如果测试时出现 CORS 错误，需要通过后端代理转发。
+- Base URL 请填写到版本路径，例如 `https://api.openai.com/v1`，代码会自动拼接 `/chat/completions` 和 `/images/generations`。
 
 ## 部署
 

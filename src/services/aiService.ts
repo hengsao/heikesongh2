@@ -1,4 +1,4 @@
-import type { AIPreferences, LifeCard, LifeTask, ReviewPeriod } from "../types";
+import type { AIApiConfig, AIPreferences, LifeCard, LifeTask, ReviewPeriod } from "../types";
 
 export type LifeCardAiInput = {
   title: string;
@@ -13,12 +13,14 @@ export type ImageGenerationInput = LifeCardAiInput & {
   shouldGenerateImage: boolean;
 };
 
-const textApiBase = import.meta.env.VITE_AI_TEXT_API_BASE as string | undefined;
-const textApiKey = import.meta.env.VITE_AI_TEXT_API_KEY as string | undefined;
-const textModel = (import.meta.env.VITE_AI_TEXT_MODEL as string | undefined) ?? "gpt-4o-mini";
-const imageApiBase = import.meta.env.VITE_AI_IMAGE_API_BASE as string | undefined;
-const imageApiKey = import.meta.env.VITE_AI_IMAGE_API_KEY as string | undefined;
-const imageModel = (import.meta.env.VITE_AI_IMAGE_MODEL as string | undefined) ?? "gpt-image-1";
+const defaultRuntimeConfig: AIApiConfig = {
+  textApiBase: import.meta.env.VITE_AI_TEXT_API_BASE ?? "",
+  textApiKey: import.meta.env.VITE_AI_TEXT_API_KEY ?? "",
+  textModel: import.meta.env.VITE_AI_TEXT_MODEL ?? "gpt-4o-mini",
+  imageApiBase: import.meta.env.VITE_AI_IMAGE_API_BASE ?? "",
+  imageApiKey: import.meta.env.VITE_AI_IMAGE_API_KEY ?? "",
+  imageModel: import.meta.env.VITE_AI_IMAGE_MODEL ?? "gpt-image-1",
+};
 
 export async function generateLifeCardText(input: LifeCardAiInput) {
   const prompt = buildLifeCardPrompt(input);
@@ -85,6 +87,26 @@ export async function generateNextTaskSuggestions(input: {
   return mockNextTaskSuggestions(input.cards);
 }
 
+export async function testTextApiConnection() {
+  const config = getRuntimeAIConfig();
+  if (!config.textApiBase || !config.textApiKey || !config.textModel) {
+    throw new Error("请先填写文本 API Base、Key 和 Model。");
+  }
+  return callTextApi("请只回复：LifeQuest 文本 API 已连接。", {
+    empathy: 50,
+    humor: 10,
+    objectivity: 80,
+  });
+}
+
+export async function testImageApiConnection() {
+  const config = getRuntimeAIConfig();
+  if (!config.imageApiBase || !config.imageApiKey || !config.imageModel) {
+    throw new Error("请先填写生图 API Base、Key 和 Model。");
+  }
+  return callImageApi("A tiny warm minimal illustration of a glowing checklist card, no text, soft light.");
+}
+
 export function buildLifeCardPrompt(input: LifeCardAiInput) {
   return [
     "你是 LifeQuest 的人生卡文案助手。请基于用户真实完成的事件写一段自然、具体、不空泛的纪念文案。",
@@ -133,22 +155,55 @@ function buildSuggestionPrompt(cards: LifeCard[], tasks: LifeTask[], preferences
 }
 
 function canUseTextApi(mode: "mock" | "api") {
-  return mode === "api" && Boolean(textApiBase && textApiKey);
+  const config = getRuntimeAIConfig();
+  return mode === "api" && Boolean(config.textApiBase && config.textApiKey && config.textModel);
 }
 
 function canUseImageApi(mode: "mock" | "api") {
-  return mode === "api" && Boolean(imageApiBase && imageApiKey);
+  const config = getRuntimeAIConfig();
+  return mode === "api" && Boolean(config.imageApiBase && config.imageApiKey && config.imageModel);
+}
+
+function getRuntimeAIConfig(): AIApiConfig {
+  const fromProfile = readStoredAIConfig();
+  return {
+    textApiBase: fromProfile.textApiBase || defaultRuntimeConfig.textApiBase,
+    textApiKey: fromProfile.textApiKey || defaultRuntimeConfig.textApiKey,
+    textModel: fromProfile.textModel || defaultRuntimeConfig.textModel,
+    imageApiBase: fromProfile.imageApiBase || defaultRuntimeConfig.imageApiBase,
+    imageApiKey: fromProfile.imageApiKey || defaultRuntimeConfig.imageApiKey,
+    imageModel: fromProfile.imageModel || defaultRuntimeConfig.imageModel,
+  };
+}
+
+function readStoredAIConfig(): AIApiConfig {
+  if (typeof localStorage === "undefined") return defaultRuntimeConfig;
+  try {
+    const raw = localStorage.getItem("lifequest.profile");
+    const profile = raw ? JSON.parse(raw) : {};
+    return {
+      ...defaultRuntimeConfig,
+      ...(profile.aiApiConfig ?? {}),
+    };
+  } catch {
+    return defaultRuntimeConfig;
+  }
+}
+
+function normalizeBaseUrl(value: string) {
+  return value.replace(/\/$/, "");
 }
 
 async function callTextApi(prompt: string, preferences: AIPreferences) {
-  const response = await fetch(`${textApiBase!.replace(/\/$/, "")}/chat/completions`, {
+  const config = getRuntimeAIConfig();
+  const response = await fetch(`${normalizeBaseUrl(config.textApiBase)}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${textApiKey}`,
+      Authorization: `Bearer ${config.textApiKey}`,
     },
     body: JSON.stringify({
-      model: textModel,
+      model: config.textModel,
       messages: [
         {
           role: "system",
@@ -165,14 +220,15 @@ async function callTextApi(prompt: string, preferences: AIPreferences) {
 }
 
 async function callImageApi(prompt: string) {
-  const response = await fetch(`${imageApiBase!.replace(/\/$/, "")}/images/generations`, {
+  const config = getRuntimeAIConfig();
+  const response = await fetch(`${normalizeBaseUrl(config.imageApiBase)}/images/generations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${imageApiKey}`,
+      Authorization: `Bearer ${config.imageApiKey}`,
     },
     body: JSON.stringify({
-      model: imageModel,
+      model: config.imageModel,
       prompt,
       n: 1,
       size: "1024x1024",

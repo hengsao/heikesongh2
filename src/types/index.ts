@@ -10,12 +10,22 @@ export type AIPreferences = {
   objectivity: number;
 };
 
+export type AIApiConfig = {
+  textApiBase: string;
+  textApiKey: string;
+  textModel: string;
+  imageApiBase: string;
+  imageApiKey: string;
+  imageModel: string;
+};
+
 export type UserProfile = {
   id: string;
   nickname: string;
   theme: "warm" | "dark";
   aiMode: "mock" | "api";
   aiPreferences: AIPreferences;
+  aiApiConfig: AIApiConfig;
 };
 
 export type LifeTask = {
