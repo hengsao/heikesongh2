@@ -19,7 +19,7 @@ import { daysBetween, formatDate, isInPeriod } from "../utils/date";
    ============================================= */
 const statCardLinks = [
   { to: "/todos", label: "今日待办", icon: ListChecks },
-  { to: "/diary", label: "小日记", icon: PenLine },
+  { to: "/diary?autoFocus=1", label: "小日记", icon: PenLine },
   { to: "/reviews", label: "复盘回溯", icon: Sparkles },
   { to: "/anniversaries", label: "最近纪念日", icon: CalendarHeart },
 ] as const;

@@ -49,6 +49,10 @@ type AppDataContextValue = {
   createLifeCard: (input: CheckInInput) => Promise<LifeCard>;
   updateDiary: (cardId: string, diary: DiaryEntry) => void;
   removeLifeCard: (cardId: string) => void;
+  diaries: DiaryNote[];
+  createDiary: (input: Pick<DiaryNote, "date" | "title" | "content">) => DiaryNote;
+  updateDiaryNote: (diary: DiaryNote) => void;
+  removeDiaryNote: (id: string) => void;
   addAnniversary: (anniversary: Omit<Anniversary, "id" | "createdAt">) => void;
   resetAllData: () => void;
 };
@@ -62,6 +66,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [lifeCards, setLifeCards] = useState(getLifeCards);
   const [anniversaries, setAnniversaries] = useState(getAnniversaries);
   const [reviewSettings, setReviewSettings] = useState(getReviewSettings);
+  const [diaries, setDiaries] = useState(getDiaries);
 
   const value = useMemo<AppDataContextValue>(
     () => ({
@@ -71,6 +76,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       lifeCards,
       anniversaries,
       reviewSettings,
+      diaries,
       updateProfile(nextProfile) {
         setProfile(nextProfile);
         saveProfile(nextProfile);
@@ -252,6 +258,31 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         saveLifeCards(nextCards);
         saveAnniversaries(nextAnniversaries);
       },
+      createDiary(input) {
+        const now = new Date().toISOString();
+        const diary: DiaryNote = {
+          id: createId("diary_note"),
+          date: input.date,
+          title: input.title,
+          content: input.content,
+          createdAt: now,
+          updatedAt: now,
+        };
+        const nextDiaries = [diary, ...diaries];
+        setDiaries(nextDiaries);
+        saveDiaries(nextDiaries);
+        return diary;
+      },
+      updateDiaryNote(diary) {
+        const nextDiaries = diaries.map((d) => (d.id === diary.id ? { ...diary, updatedAt: new Date().toISOString() } : d));
+        setDiaries(nextDiaries);
+        saveDiaries(nextDiaries);
+      },
+      removeDiaryNote(id) {
+        const nextDiaries = diaries.filter((d) => d.id !== id);
+        setDiaries(nextDiaries);
+        saveDiaries(nextDiaries);
+      },
       addAnniversary(input) {
         const anniversary: Anniversary = {
           ...input,
@@ -272,7 +303,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         setReviewSettings(getReviewSettings());
       },
     }),
-    [anniversaries, lifeCards, profile, reviewSettings, tasks, todos],
+    [anniversaries, lifeCards, profile, reviewSettings, tasks, todos, diaries],
   );
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;

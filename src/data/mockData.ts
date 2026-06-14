@@ -1,5 +1,5 @@
 import { presetTasks } from "./presetTasks";
-import type { Anniversary, LifeCard, TodoItem, UserProfile } from "../types";
+import type { Anniversary, DiaryNote, LifeCard, TodoItem, UserProfile } from "../types";
 
 const today = new Date();
 const daysAgo = (days: number, hour = 20) => {
@@ -173,6 +173,25 @@ export const mockAnniversaries: Anniversary[] = [
     source: "manual",
     description: "给毕业前的自己留一段出发的时间。",
     createdAt: daysAgo(6),
+  },
+];
+
+export const mockDiaryNotes: DiaryNote[] = [
+  {
+    id: "diary_note_1",
+    date: daysAgo(3, 21).slice(0, 10),
+    title: "一个人的火锅",
+    content: "一开始确实有点不自在，旁边桌都是三五成群的人。但慢慢地，我发现可以随便点自己爱吃的菜，不用在意别人的节奏，这种感觉意外地自由。",
+    createdAt: daysAgo(3, 21),
+    updatedAt: daysAgo(3, 21),
+  },
+  {
+    id: "diary_note_2",
+    date: daysAgo(7, 20).slice(0, 10),
+    title: "今天天气真好",
+    content: "走在路上不经意抬头，天空蓝得很干净。拍了张照片，可能多年后回头看，这张照片就是我还能想起今天的方式。",
+    createdAt: daysAgo(7, 20),
+    updatedAt: daysAgo(7, 20),
   },
 ];
 
